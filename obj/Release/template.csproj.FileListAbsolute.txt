@@ -8,3 +8,13 @@ F:\Dropbox\Tanisha\template_PT\obj\Release\template.exe
 F:\Dropbox\Tanisha\template_PT\obj\Release\template.pdb
 F:\Dropbox\Tanisha\template_PT\bin\Release\Cloo.dll
 F:\Dropbox\Tanisha\template_PT\bin\Release\Cloo.xml
+D:\Users\Documents\GitHub\PathTracer\bin\Release\template.exe.config
+D:\Users\Documents\GitHub\PathTracer\obj\Release\template.exe
+D:\Users\Documents\GitHub\PathTracer\obj\Release\template.pdb
+D:\Users\Documents\GitHub\PathTracer\bin\Release\template.exe
+D:\Users\Documents\GitHub\PathTracer\bin\Release\template.pdb
+D:\Users\Documents\GitHub\PathTracer\bin\Release\Cloo.dll
+D:\Users\Documents\GitHub\PathTracer\bin\Release\OpenTK.dll
+D:\Users\Documents\GitHub\PathTracer\bin\Release\System.Numerics.Vectors.dll
+D:\Users\Documents\GitHub\PathTracer\bin\Release\Cloo.xml
+D:\Users\Documents\GitHub\PathTracer\obj\Release\template.csprojResolveAssemblyReference.cache

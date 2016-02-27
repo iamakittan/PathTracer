@@ -40,7 +40,7 @@ namespace Template
         const int MAXDEPTH = 20;
 
         // GPU variables
-        bool GLInterop = false;
+        bool GLInterop = true;
         ComputeContext context;
         ComputeCommandQueue queue;
         ComputeProgram program;
@@ -79,7 +79,7 @@ namespace Template
             // initialize max threads
             parallelOptions = new ParallelOptions();
             parallelOptions.MaxDegreeOfParallelism = Environment.ProcessorCount;
-            /*
+            
             // GPU variables
             // pick first platform
             var platform = ComputePlatform.Platforms[0];
@@ -87,12 +87,10 @@ namespace Template
             // create context with all gpu devices
             if (GLInterop)
             {
-                IntPtr glHandle = (GraphicsContext.CurrentContext as IGraphicsContextInternal).Context.Handle;
-                IntPtr wglHandle = wglGetCurrentDC();
-                var p1 = new ComputeContextProperty(ComputeContextPropertyName.Platform, platform.Handle.Value);
-                var p2 = new ComputeContextProperty(ComputeContextPropertyName.CL_GL_CONTEXT_KHR, glHandle);
-                var p3 = new ComputeContextProperty(ComputeContextPropertyName.CL_WGL_HDC_KHR, wglHandle);
-                var cpl = new ComputeContextPropertyList(new ComputeContextProperty[] { p1, p2, p3 });
+                ComputeContextProperty p1 = new ComputeContextProperty(ComputeContextPropertyName.Platform, platform.Handle.Value);
+                ComputeContextProperty p2 = new ComputeContextProperty(ComputeContextPropertyName.CL_GL_CONTEXT_KHR, (GraphicsContext.CurrentContext as IGraphicsContextInternal).Context.Handle);
+                ComputeContextProperty p3 = new ComputeContextProperty(ComputeContextPropertyName.CL_WGL_HDC_KHR, wglGetCurrentDC());
+                ComputeContextPropertyList cpl = new ComputeContextPropertyList(new ComputeContextProperty[] { p1, p2, p3 });
                 context = new ComputeContext(ComputeDeviceTypes.Gpu, cpl, null, IntPtr.Zero);
             }
             else
@@ -135,7 +133,7 @@ namespace Template
                 flags = ComputeMemoryFlags.WriteOnly;
                 texBuffer = ComputeImage2D.CreateFromGLTexture2D(context, flags, (int)TextureTarget.Texture2D, 0, texID);
             }
-            */
+            
             // initialize dataArray
             int counter = 0;
             for (int y = 0; y < screen.height; y += 8)
@@ -217,7 +215,6 @@ namespace Template
             // render
             if (useGPU)
             {
-                /*
                 // add your CPU + OpenCL path here
                 // mind the gpuPlatform parameter! This allows us to specify the platform on our
                 // test system.
@@ -268,7 +265,6 @@ namespace Template
                             }
                     }
                 }
-                */
             }
             else
             {

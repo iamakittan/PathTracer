@@ -15,7 +15,7 @@ namespace Template
 	{
 		static int screenID;
 		static Game game;
-		static bool useGPU = false, terminated = false;
+		static bool useGPU = true, terminated = false;
 		static int runningTime = -1, gpuPlatform = 0;
 		protected override void OnLoad( EventArgs e )
 		{
