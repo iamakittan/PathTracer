@@ -1,0 +1,41 @@
+Testcase;Status;Tijd;CPU;Omschrijving
+Referentie;Correct;56;15,12;100%
+CPU-versie;Correct;229;15,03;580%
+GPU-versie;Fout;0;15,02;100%
+
+------------------------------------
+
+1;Referentie;Correct;56;15,12;100%
+Test 1 - Referentie
+Benchmark van ons referentieprogramma
+
+Uitvoer:
+56 15121 49,03654 6 12
+
+------------------------------------
+
+2;CPU-versie;Correct;229;15,03;580%
+Test 2 - CPU-versie
+Benchmark van de multithreaded versie.
+
+Uitvoer:
+229 15029 46,72503 6 12
+
+Performance-winst t.o.v. referentie: 409%
+We verwachten op deze computer 609% tot 673%
+Indicatie aantal punten: 0 / 3
+
+------------------------------------
+
+3;GPU-versie;Fout;0;15,02;100%
+Test 3 - GPU-versie
+Benchmark van de OpenCL-versie
+
+Uitvoer:
+0 15022 290,0634 6 12
+
+De afwijking van de referentie-afbeelding was te groot (rmse > 150).
+
+Microsoft Windows NT 6.2.9200.0 (x64)
+.NET version: 4.0.30319.42000
+6 physical core(s), 12 virtual core(s) (hyperthreading), 1 processor(s)

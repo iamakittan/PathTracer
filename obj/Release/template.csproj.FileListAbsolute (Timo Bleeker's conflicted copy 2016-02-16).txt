@@ -1,0 +1,11 @@
+F:\Dropbox\Tanisha\template_PT\bin\Release\template.exe.config
+F:\Dropbox\Tanisha\template_PT\bin\Release\template.exe
+F:\Dropbox\Tanisha\template_PT\bin\Release\template.pdb
+F:\Dropbox\Tanisha\template_PT\bin\Release\OpenTK.dll
+F:\Dropbox\Tanisha\template_PT\bin\Release\System.Numerics.Vectors.dll
+F:\Dropbox\Tanisha\template_PT\obj\Release\template.csprojResolveAssemblyReference.cache
+F:\Dropbox\Tanisha\template_PT\obj\Release\template.exe
+F:\Dropbox\Tanisha\template_PT\obj\Release\template.pdb
+C:\Users\Timo\Dropbox\Tanisha\template_PT\bin\Release\template.exe.config
+C:\Users\Timo\Dropbox\Tanisha\template_PT\obj\Release\template.exe
+C:\Users\Timo\Dropbox\Tanisha\template_PT\obj\Release\template.pdb
