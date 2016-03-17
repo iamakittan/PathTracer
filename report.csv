@@ -1,38 +1,54 @@
 Testcase;Status;Tijd;CPU;Omschrijving
-Referentie;Correct;56;15,12;100%
-CPU-versie;Correct;229;15,03;580%
-GPU-versie;Fout;0;15,02;100%
+Referentie;Correct;55;15.20;100%
+CPU-versie;Error;15;15.00;100%
+GPU-versie;Error;15;15.00;100%
 
 ------------------------------------
 
-1;Referentie;Correct;56;15,12;100%
+1;Referentie;Correct;55;15.20;100%
 Test 1 - Referentie
 Benchmark van ons referentieprogramma
 
 Uitvoer:
-56 15121 49,03654 6 12
+55 15204 49.21918 6 12
 
 ------------------------------------
 
-2;CPU-versie;Correct;229;15,03;580%
+2;CPU-versie;Error;15;15.00;100%
 Test 2 - CPU-versie
 Benchmark van de multithreaded versie.
 
 Uitvoer:
-229 15029 46,72503 6 12
+initializing OpenCL... AMD Accelerated Parallel Processing (FULL_PROFILE).
 
-Performance-winst t.o.v. referentie: 409%
-We verwachten op deze computer 609% tot 673%
-Indicatie aantal punten: 0 / 3
+Foutmelding:
+Unhandled Exception: Cloo.ComputeException: OpenCL error code detected: CL_INVALID_GL_SHAREGROUP_REFERENCE_KHR.
+   at Cloo.ComputeException.ThrowOnError(ComputeErrorCode errorCode)
+   at Cloo.ComputeContext..ctor(ComputeDeviceTypes deviceType, ComputeContextPropertyList properties, ComputeContextNotifier notify, IntPtr userDataPtr)
+   at Template.Game.Init(Int32 rt, Boolean gpu, Int32 platformIdx) in d:\Users\Documents\GitHub\PathTracer\game.cs:line 94
+   at Template.OpenTKApp.OnLoad(EventArgs e) in d:\Users\Documents\GitHub\PathTracer\template.cs:line 33
+   at OpenTK.GameWindow.Run(Double updates_per_second, Double frames_per_second)
+   at Template.OpenTKApp.Main(String[] args) in d:\Users\Documents\GitHub\PathTracer\template.cs:line 99
+
+De afwijking van de referentie-afbeelding was te groot (rmse > 150).
 
 ------------------------------------
 
-3;GPU-versie;Fout;0;15,02;100%
+3;GPU-versie;Error;15;15.00;100%
 Test 3 - GPU-versie
 Benchmark van de OpenCL-versie
 
 Uitvoer:
-0 15022 290,0634 6 12
+initializing OpenCL... AMD Accelerated Parallel Processing (FULL_PROFILE).
+
+Foutmelding:
+Unhandled Exception: Cloo.ComputeException: OpenCL error code detected: CL_INVALID_GL_SHAREGROUP_REFERENCE_KHR.
+   at Cloo.ComputeException.ThrowOnError(ComputeErrorCode errorCode)
+   at Cloo.ComputeContext..ctor(ComputeDeviceTypes deviceType, ComputeContextPropertyList properties, ComputeContextNotifier notify, IntPtr userDataPtr)
+   at Template.Game.Init(Int32 rt, Boolean gpu, Int32 platformIdx) in d:\Users\Documents\GitHub\PathTracer\game.cs:line 94
+   at Template.OpenTKApp.OnLoad(EventArgs e) in d:\Users\Documents\GitHub\PathTracer\template.cs:line 33
+   at OpenTK.GameWindow.Run(Double updates_per_second, Double frames_per_second)
+   at Template.OpenTKApp.Main(String[] args) in d:\Users\Documents\GitHub\PathTracer\template.cs:line 99
 
 De afwijking van de referentie-afbeelding was te groot (rmse > 150).
 

@@ -4,10 +4,12 @@ using System.Numerics;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Collections.Generic;
+using System.Drawing;
 using Cloo;
 using System.IO;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
+using System.Runtime.InteropServices;
 
 // making vectors work in VS2013:
 // - Uninstall Nuget package manager
@@ -16,12 +18,10 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Template
 {
-
     class Game
     {
         // member variables
-        public Surface screen;					// target canvas
-        Camera camera;							// camera
+        public Surface screen;					// camera
         Scene scene;							// hardcoded scene
         Stopwatch timer = new Stopwatch();		// timer
         Vector3[] accumulator;					// buffer for accumulated samples
@@ -40,18 +40,22 @@ namespace Template
         const int MAXDEPTH = 20;
 
         // GPU variables
-        bool GLInterop = true;
-        ComputeContext context;
-        ComputeCommandQueue queue;
-        ComputeProgram program;
-        ComputeKernel kernel;
-        ComputeBuffer<int> buffer;
+        bool GLInterop = false;
+        static ComputeContext context;
+        static ComputeCommandQueue queue;
+        static ComputeProgram program;
+        static ComputeKernel kernel;
+        static ComputeBuffer<int> buffer;
         static int[] data;
         static float[] texData = new float[512 * 512 * 4];
         static int texID;
         ComputeImage2D texBuffer;
         [System.Runtime.InteropServices.DllImport("opengl32", SetLastError = true)]
         static extern IntPtr wglGetCurrentDC();
+        static ComputeBuffer<Vector3> accBuffer;
+        GPUCamera gpuCamera;
+        long[] work;
+        static float t = 0;
 
         // clear the accumulator: happens when camera moves
         private void ClearAccumulator()
@@ -59,6 +63,9 @@ namespace Template
             for (int s = screen.width * screen.height, i = 0; i < s; i++)
                 accumulator[i] = Vector3.Zero;
             spp = 0;
+            var flags = ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.UseHostPointer;
+            accBuffer = new ComputeBuffer<Vector3>(context, flags, accumulator);
+            kernel.SetMemoryArgument(0, buffer);
         }
 
         // initialize renderer: takes in command line parameters passed by template code
@@ -70,11 +77,10 @@ namespace Template
             gpuPlatform = platformIdx;
             // initialize accumulator
             accumulator = new Vector3[screen.width * screen.height];
-            ClearAccumulator();
             // setup scene
             scene = new Scene();
             // setup camera
-            camera = new Camera(screen.width, screen.height);
+            gpuCamera = new GPUCamera(screen.width, screen.height);
 
             // initialize max threads
             parallelOptions = new ParallelOptions();
@@ -82,8 +88,8 @@ namespace Template
             
             // GPU variables
             // pick first platform
-            var platform = ComputePlatform.Platforms[0];
-            Console.Write("initializing OpenCL... " + platform.Name + " (" + platform.Profile + ").\n");
+            var platform = ComputePlatform.Platforms[gpuPlatform];
+
             // create context with all gpu devices
             if (GLInterop)
             {
@@ -97,12 +103,14 @@ namespace Template
             {
                 context = new ComputeContext(ComputeDeviceTypes.Gpu, new ComputeContextPropertyList(platform), null, IntPtr.Zero);
             }
-            // load opencl source
+
             var streamReader = new StreamReader("../../program.cl");
             string clSource = streamReader.ReadToEnd();
             streamReader.Close();
+
             // create program with opencl source
             program = new ComputeProgram(context, clSource);
+
             // compile opencl source
             try
             {
@@ -113,8 +121,7 @@ namespace Template
                 Console.Write("error in kernel code:\n");
                 Console.Write(program.GetBuildLog(context.Devices[0]) + "\n");
             }
-            // create a command queue with first gpu found
-            queue = new ComputeCommandQueue(context, context.Devices[0], 0);
+           
             // load chosen kernel from program
             kernel = program.CreateKernel("device_function");
             // create some data
@@ -122,6 +129,24 @@ namespace Template
             // allocate a memory buffer with the message (the int array)
             var flags = ComputeMemoryFlags.WriteOnly | ComputeMemoryFlags.UseHostPointer;
             buffer = new ComputeBuffer<int>(context, flags, data);
+
+            kernel.SetMemoryArgument(0, buffer);
+            ComputeBuffer<float> skyboxBuffer = new ComputeBuffer<float>(context, flags, Scene.skybox);
+            ComputeBuffer<Sphere> sphereBuffer = new ComputeBuffer<Sphere>(context, flags, Scene.sphere);
+            ComputeBuffer<Sphere> planeBuffer = new ComputeBuffer<Sphere>(context, flags, Scene.planes);
+            kernel.SetMemoryArgument(1, skyboxBuffer);
+            kernel.SetValueArgument(2, gpuCamera);
+            kernel.SetMemoryArgument(4, sphereBuffer);
+            kernel.SetMemoryArgument(5, planeBuffer);
+            kernel.SetValueArgument(6, Scene.light);
+
+            // create a command queue with first gpu found
+            queue = new ComputeCommandQueue(context, context.Devices[0], 0);
+            work = new long[] { screen.pixels.Length };
+
+
+            ClearAccumulator();
+            /*
             // create a texture to draw to from OpenCL
             if (GLInterop)
             {
@@ -133,7 +158,7 @@ namespace Template
                 flags = ComputeMemoryFlags.WriteOnly;
                 texBuffer = ComputeImage2D.CreateFromGLTexture2D(context, flags, (int)TextureTarget.Texture2D, 0, texID);
             }
-            
+            */
             // initialize dataArray
             int counter = 0;
             for (int y = 0; y < screen.height; y += 8)
@@ -198,7 +223,7 @@ namespace Template
         // tick: renders one frame
         public void Tick()
         {
-            float t = 21.5f;
+            //float t = 21.5f;
             // initialize timer
             if (firstFrame)
             {
@@ -207,7 +232,7 @@ namespace Template
                 firstFrame = false;
             }
             // handle keys, only when running time set to -1 (infinite)
-            if (runningTime == -1) if (camera.HandleInput())
+            if (runningTime == -1) if (gpuCamera.HandleInput())
                 {
                     // camera moved; restart
                     ClearAccumulator();
@@ -215,6 +240,7 @@ namespace Template
             // render
             if (useGPU)
             {
+                /*
                 // add your CPU + OpenCL path here
                 // mind the gpuPlatform parameter! This allows us to specify the platform on our
                 // test system.
@@ -265,6 +291,16 @@ namespace Template
                             }
                     }
                 }
+                 */
+
+                gpuCamera.Update();
+                float scale = 1.0f / (float)++spp;
+                kernel.SetValueArgument(2, gpuCamera);
+                kernel.SetValueArgument(3, scale);
+                queue.Execute(kernel, null, work, null, null);
+                queue.Finish();
+                queue.ReadFromBuffer(buffer, ref screen.pixels, true, null);
+                int[] pixels = new int[screen.pixels.Length];
             }
             else
             {
@@ -277,7 +313,7 @@ namespace Template
                         for (int i = dataArray[id].x1; i < dataArray[id].x2 && i < screen.width; i++)
                         {
                             // generate primary ray
-                            Ray ray = camera.Generate(RTTools.GetRNG(), i, j);
+                            Ray ray = gpuCamera.Generate(RTTools.GetRNG(), i, j);
                             // trace path
                             int pixelIdx = i + j * screen.width;
                             accumulator[pixelIdx] += Sample(ray, 0);
