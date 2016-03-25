@@ -2,40 +2,20 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
 
+
 namespace Template
 {
-    [StructLayout(LayoutKind.Explicit, Size = 128, Pack = 1)]
-    struct GPUCamera
+    class Camera
     {
-        [FieldOffset(0)]
-        public int screenWidth;
-        [FieldOffset(4)]
-        public int screenHeight;
-        [FieldOffset(16)]
-        public Vector3 p1;
-        [FieldOffset(32)]
-        public Vector3 p2;
-        [FieldOffset(48)]
-        public Vector3 p3;
-        [FieldOffset(64)]
         public Vector3 pos;
-        [FieldOffset(80)]
-        public Vector3 right;
-        [FieldOffset(96)]
-        public Vector3 up;
-        [FieldOffset(112)]
         public Vector3 target;
-        [FieldOffset(128)]
-        public Vector3 E;
-        [FieldOffset(144)]
         public float focalDistance;
-        [FieldOffset(148)]
-        public float aspectRatio;
-        [FieldOffset(152)]
-        public float lensSize;
+        public Vector3 E;
+        public Vector3 p1, p2, p3, up, right;
+        public int screenWidth, screenHeight;
+        public float aspectRatio, lensSize;
 
-
-        public GPUCamera(int w, int h)
+        public Camera(int w, int h)
         {
             screenWidth = w;
             screenHeight = h;
@@ -43,14 +23,7 @@ namespace Template
             lensSize = 0.04f;
             pos = new Vector3(-0.94f, -0.037f, -3.342f);
             target = new Vector3(-0.418f, -0.026f, -2.435f);
-            p1 = Vector3.Zero;
-            p2 = Vector3.Zero;
-            p3 = Vector3.Zero;
-            up = Vector3.Zero;
-            right = Vector3.Zero;
-            E = Vector3.Zero;
-
-            focalDistance = 0;
+            Update();
         }
 
         public bool HandleInput()
@@ -75,7 +48,6 @@ namespace Template
             }
             return false;
         }
-
         public void Update()
         {
             // construct a look-at matrix
@@ -93,7 +65,6 @@ namespace Template
             p2 = C + 0.5f * focalDistance * aspectRatio * right + 0.5f * focalDistance * up;
             p3 = C - 0.5f * focalDistance * aspectRatio * right - 0.5f * focalDistance * up;
         }
-
         public Ray Generate(Random rng, int x, int y)
         {
             float r0 = (float)rng.NextDouble();
@@ -112,4 +83,41 @@ namespace Template
             return new Ray(P, D, 1e34f);
         }
     }
+
+    [StructLayout(LayoutKind.Explicit, Size = 128, Pack = 1)]
+    struct GPUCamera
+    {
+        [FieldOffset(0)]
+        public int screenWidth;
+        [FieldOffset(4)]
+        public int screenHeight;
+        [FieldOffset(16)]
+        public Vector3 p1;
+        [FieldOffset(32)]
+        public Vector3 p2;
+        [FieldOffset(48)]
+        public Vector3 p3;
+        [FieldOffset(64)]
+        public Vector3 pos;
+        [FieldOffset(80)]
+        public Vector3 right;
+        [FieldOffset(96)]
+        public Vector3 up;
+        [FieldOffset(112)]
+        public float lensSize;
+
+        public GPUCamera(Vector3 pos, Vector3 p1, Vector3 p2, Vector3 p3, Vector3 up, Vector3 right, int screenWidth, int screenHeight, float lensSize)
+        {
+            this.screenWidth = screenWidth;
+            this.screenHeight = screenHeight;
+            this.p1 = p1;
+            this.p2 = p2;
+            this.p3 = p3;
+            this.pos = pos;
+            this.right = right;
+            this.up = up;
+            this.lensSize = lensSize;
+        }
+    }
+
 } // namespace Template

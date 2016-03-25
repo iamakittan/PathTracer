@@ -21,7 +21,8 @@ namespace Template
     class Game
     {
         // member variables
-        public Surface screen;					// camera
+        public Surface screen;					// target canvas
+        Camera camera;							// camera
         Scene scene;							// hardcoded scene
         Stopwatch timer = new Stopwatch();		// timer
         Vector3[] accumulator;					// buffer for accumulated samples
@@ -65,7 +66,6 @@ namespace Template
             spp = 0;
             var flags = ComputeMemoryFlags.ReadWrite | ComputeMemoryFlags.UseHostPointer;
             accBuffer = new ComputeBuffer<Vector3>(context, flags, accumulator);
-            kernel.SetMemoryArgument(0, buffer);
         }
 
         // initialize renderer: takes in command line parameters passed by template code
@@ -80,7 +80,8 @@ namespace Template
             // setup scene
             scene = new Scene();
             // setup camera
-            gpuCamera = new GPUCamera(screen.width, screen.height);
+            camera = new Camera(screen.width, screen.height);
+            gpuCamera = new GPUCamera(camera.pos, camera.p1, camera.p2, camera.p3, camera.up, camera.right, screen.width, screen.height, camera.lensSize);
 
             // initialize max threads
             parallelOptions = new ParallelOptions();
@@ -121,7 +122,7 @@ namespace Template
                 Console.Write("error in kernel code:\n");
                 Console.Write(program.GetBuildLog(context.Devices[0]) + "\n");
             }
-           
+            
             // load chosen kernel from program
             kernel = program.CreateKernel("device_function");
             // create some data
@@ -129,7 +130,7 @@ namespace Template
             // allocate a memory buffer with the message (the int array)
             var flags = ComputeMemoryFlags.WriteOnly | ComputeMemoryFlags.UseHostPointer;
             buffer = new ComputeBuffer<int>(context, flags, data);
-
+            
             kernel.SetMemoryArgument(0, buffer);
             ComputeBuffer<float> skyboxBuffer = new ComputeBuffer<float>(context, flags, Scene.skybox);
             ComputeBuffer<Sphere> sphereBuffer = new ComputeBuffer<Sphere>(context, flags, Scene.sphere);
@@ -143,10 +144,10 @@ namespace Template
             // create a command queue with first gpu found
             queue = new ComputeCommandQueue(context, context.Devices[0], 0);
             work = new long[] { screen.pixels.Length };
-
-
+            
+            
             ClearAccumulator();
-            /*
+            
             // create a texture to draw to from OpenCL
             if (GLInterop)
             {
@@ -158,7 +159,7 @@ namespace Template
                 flags = ComputeMemoryFlags.WriteOnly;
                 texBuffer = ComputeImage2D.CreateFromGLTexture2D(context, flags, (int)TextureTarget.Texture2D, 0, texID);
             }
-            */
+            
             // initialize dataArray
             int counter = 0;
             for (int y = 0; y < screen.height; y += 8)
@@ -232,7 +233,7 @@ namespace Template
                 firstFrame = false;
             }
             // handle keys, only when running time set to -1 (infinite)
-            if (runningTime == -1) if (gpuCamera.HandleInput())
+            if (runningTime == -1) if (camera.HandleInput())
                 {
                     // camera moved; restart
                     ClearAccumulator();
@@ -240,7 +241,7 @@ namespace Template
             // render
             if (useGPU)
             {
-                /*
+                
                 // add your CPU + OpenCL path here
                 // mind the gpuPlatform parameter! This allows us to specify the platform on our
                 // test system.
@@ -291,9 +292,10 @@ namespace Template
                             }
                     }
                 }
-                 */
+                
 
-                gpuCamera.Update();
+                camera.Update();
+                gpuCamera = new GPUCamera(camera.pos, camera.p1, camera.p2, camera.p3, camera.up, camera.right, screen.width, screen.height, camera.lensSize);
                 float scale = 1.0f / (float)++spp;
                 kernel.SetValueArgument(2, gpuCamera);
                 kernel.SetValueArgument(3, scale);
@@ -313,7 +315,7 @@ namespace Template
                         for (int i = dataArray[id].x1; i < dataArray[id].x2 && i < screen.width; i++)
                         {
                             // generate primary ray
-                            Ray ray = gpuCamera.Generate(RTTools.GetRNG(), i, j);
+                            Ray ray = camera.Generate(RTTools.GetRNG(), i, j);
                             // trace path
                             int pixelIdx = i + j * screen.width;
                             accumulator[pixelIdx] += Sample(ray, 0);

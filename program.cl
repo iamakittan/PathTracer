@@ -21,8 +21,12 @@
 		float4 pos;
 		float4 right;
 		float4 up;
+		float4 target;
+		float4 E;
+		float focalDistance;
+		float aspectRatio;
 		float lensSize;
-	} Camera;
+	} GPUCamera;
 		
 	typedef struct
 	{
@@ -119,21 +123,21 @@
 		return mat;
 	}
 
-// Generates a ray given the id and camera attributes.
-	Ray Generate(int id, Random* rng, Camera camera)
+// Generates a ray given the id and gpuCamera attributes.
+	Ray Generate(int id, Random* rng, GPUCamera gpuCamera)
 	{
-		 int x = id % camera.screenWidth;
-		 int y = id / camera.screenHeight;
+		 int x = id % gpuCamera.screenWidth;
+		 int y = id / gpuCamera.screenHeight;
 
 		 float r0 = RandomFloat(rng);
 		 float r1 = RandomFloat(rng);
 		 float r2 = RandomFloat(rng) - 0.5f;
 		 float r3 = RandomFloat(rng) - 0.5f;
 
-		 float u = ((float)x + r0) / (float)camera.screenWidth;
-		 float v = ((float)y + r1) / (float)camera.screenHeight;
-		 float3 T = convertFloat4(camera.p1) + u * (convertFloat4(camera.p2) - convertFloat4(camera.p1)) + v * (convertFloat4(camera.p3) - convertFloat4(camera.p1));
-		 float3 P = convertFloat4(camera.pos) + camera.lensSize * (r2 * convertFloat4(camera.right) + r3 * convertFloat4(camera.up));
+		 float u = ((float)x + r0) / (float)gpuCamera.screenWidth;
+		 float v = ((float)y + r1) / (float)gpuCamera.screenHeight;
+		 float3 T = convertFloat4(gpuCamera.p1) + u * (convertFloat4(gpuCamera.p2) - convertFloat4(gpuCamera.p1)) + v * (convertFloat4(gpuCamera.p3) - convertFloat4(gpuCamera.p1));
+		 float3 P = convertFloat4(gpuCamera.pos) + gpuCamera.lensSize * (r2 * convertFloat4(gpuCamera.right) + r3 * convertFloat4(gpuCamera.up));
 		 float3 D = normalize( T - P );
 		 // return new primary ray
 		 Ray ray;
@@ -320,11 +324,11 @@
 	  return temp;
 	}
 
-		__kernel void device_function(__global int* pixels, __global float* skyboxArray, __read_only Camera camera, float scale, __global Sphere* spheres, __global Sphere* planes, Sphere light)
+		__kernel void device_function(__global int* pixels, __global float* skyboxArray, __read_only GPUCamera gpuCamera, float scale, __global Sphere* spheres, __global Sphere* planes, Sphere light)
 	{ 	
 		Random rng = newRandom(10 + get_global_id(0) * get_global_id(0));
 				
-		Ray ray = Generate(get_global_id(0), &rng, camera);
+		Ray ray = Generate(get_global_id(0), &rng, gpuCamera);
 		ray.isFinished = false;
 		float3 result = (float3) (1, 1, 1);
 		int depth = 0;

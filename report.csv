@@ -1,36 +1,29 @@
 Testcase;Status;Tijd;CPU;Omschrijving
-Referentie;Correct;55;15.20;100%
-CPU-versie;Error;15;15.00;100%
+Referentie;Correct;55;15.23;100%
+CPU-versie;Correct;246;15.04;598%
 GPU-versie;Error;15;15.00;100%
 
 ------------------------------------
 
-1;Referentie;Correct;55;15.20;100%
+1;Referentie;Correct;55;15.23;100%
 Test 1 - Referentie
 Benchmark van ons referentieprogramma
 
 Uitvoer:
-55 15204 49.21918 6 12
+55 15234 49.25144 6 12
 
 ------------------------------------
 
-2;CPU-versie;Error;15;15.00;100%
+2;CPU-versie;Correct;246;15.04;598%
 Test 2 - CPU-versie
 Benchmark van de multithreaded versie.
 
 Uitvoer:
-initializing OpenCL... AMD Accelerated Parallel Processing (FULL_PROFILE).
+246 15038 46.62275 6 12
 
-Foutmelding:
-Unhandled Exception: Cloo.ComputeException: OpenCL error code detected: CL_INVALID_GL_SHAREGROUP_REFERENCE_KHR.
-   at Cloo.ComputeException.ThrowOnError(ComputeErrorCode errorCode)
-   at Cloo.ComputeContext..ctor(ComputeDeviceTypes deviceType, ComputeContextPropertyList properties, ComputeContextNotifier notify, IntPtr userDataPtr)
-   at Template.Game.Init(Int32 rt, Boolean gpu, Int32 platformIdx) in d:\Users\Documents\GitHub\PathTracer\game.cs:line 94
-   at Template.OpenTKApp.OnLoad(EventArgs e) in d:\Users\Documents\GitHub\PathTracer\template.cs:line 33
-   at OpenTK.GameWindow.Run(Double updates_per_second, Double frames_per_second)
-   at Template.OpenTKApp.Main(String[] args) in d:\Users\Documents\GitHub\PathTracer\template.cs:line 99
-
-De afwijking van de referentie-afbeelding was te groot (rmse > 150).
+Performance-winst t.o.v. referentie: 447%
+We verwachten op deze computer 609% tot 673%
+Indicatie aantal punten: 0 / 3
 
 ------------------------------------
 
@@ -39,14 +32,14 @@ Test 3 - GPU-versie
 Benchmark van de OpenCL-versie
 
 Uitvoer:
-initializing OpenCL... AMD Accelerated Parallel Processing (FULL_PROFILE).
+(leeg)
 
 Foutmelding:
-Unhandled Exception: Cloo.ComputeException: OpenCL error code detected: CL_INVALID_GL_SHAREGROUP_REFERENCE_KHR.
-   at Cloo.ComputeException.ThrowOnError(ComputeErrorCode errorCode)
-   at Cloo.ComputeContext..ctor(ComputeDeviceTypes deviceType, ComputeContextPropertyList properties, ComputeContextNotifier notify, IntPtr userDataPtr)
-   at Template.Game.Init(Int32 rt, Boolean gpu, Int32 platformIdx) in d:\Users\Documents\GitHub\PathTracer\game.cs:line 94
-   at Template.OpenTKApp.OnLoad(EventArgs e) in d:\Users\Documents\GitHub\PathTracer\template.cs:line 33
+Unhandled Exception: System.NullReferenceException: Object reference not set to an instance of an object.
+   at Template.Game.Tick() in d:\Users\Documents\GitHub\PathTracer\game.cs:line 300
+   at Template.OpenTKApp.OnRenderFrame(FrameEventArgs e) in d:\Users\Documents\GitHub\PathTracer\template.cs:line 57
+   at OpenTK.GameWindow.RaiseRenderFrame(Double elapsed, Double& timestamp)
+   at OpenTK.GameWindow.DispatchUpdateAndRenderFrame(Object sender, EventArgs e)
    at OpenTK.GameWindow.Run(Double updates_per_second, Double frames_per_second)
    at Template.OpenTKApp.Main(String[] args) in d:\Users\Documents\GitHub\PathTracer\template.cs:line 99
 

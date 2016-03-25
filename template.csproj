@@ -72,7 +72,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="gpuCamera.cs" />
+    <Compile Include="camera.cs" />
     <Compile Include="fastfile.cs" />
     <Compile Include="game.cs" />
     <Compile Include="geometry.cs" />
