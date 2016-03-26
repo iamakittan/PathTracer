@@ -28,12 +28,14 @@ namespace Template
         Vector3[] accumulator;					// buffer for accumulated samples
         int spp = 0;							// samples per pixel; accumulator will be divided by this
         int runningTime = -1;					// running time (from commandline); default = -1 (infinite)
-        bool useGPU = true;						// GPU code enabled (from commandline)
+        bool useGPU = false;						// GPU code enabled (from commandline)
         int gpuPlatform = 0;					// OpenCL platform to use (from commandline)
         bool firstFrame = true;					// first frame: used to start timer once
+
         ParallelOptions parallelOptions;
-        List<DataBundle> amount = new List<DataBundle>();
-        DataBundle[] dataArray = new DataBundle[2744];
+        //List<DataBundle> amount = new List<DataBundle>();
+        DataBundle[] dataArray = new DataBundle[3626];
+
         // constants for rendering algorithm
         const float PI = 3.14159265359f;
         const float INVPI = 1.0f / PI;
@@ -55,8 +57,6 @@ namespace Template
         static extern IntPtr wglGetCurrentDC();
         static ComputeBuffer<Vector3> accBuffer;
         GPUCamera gpuCamera;
-        long[] work;
-        static float t = 0;
 
         // clear the accumulator: happens when camera moves
         private void ClearAccumulator()
@@ -85,12 +85,12 @@ namespace Template
 
             // initialize max threads
             parallelOptions = new ParallelOptions();
-            parallelOptions.MaxDegreeOfParallelism = Environment.ProcessorCount;
+            parallelOptions.MaxDegreeOfParallelism = Environment.ProcessorCount * 2;
             
             // GPU variables
             // pick first platform
             var platform = ComputePlatform.Platforms[gpuPlatform];
-
+            
             // create context with all gpu devices
             if (GLInterop)
             {
@@ -143,7 +143,6 @@ namespace Template
 
             // create a command queue with first gpu found
             queue = new ComputeCommandQueue(context, context.Devices[0], 0);
-            work = new long[] { screen.pixels.Length };
             
             
             ClearAccumulator();
@@ -160,14 +159,15 @@ namespace Template
                 texBuffer = ComputeImage2D.CreateFromGLTexture2D(context, flags, (int)TextureTarget.Texture2D, 0, texID);
             }
             
+
             // initialize dataArray
             int counter = 0;
-            for (int y = 0; y < screen.height; y += 8)
+            for (int y = 0; y < screen.height; y += 12)
             {
-                for (int x = 0; x < screen.width; x += 16)
+                for (int x = 0; x < screen.width; x += 8)
                 {
                     //amount.Add(new DataBundle(x, y, 12, 8));
-                    dataArray[counter] = new DataBundle(x, y, 16, 8);
+                    dataArray[counter] = new DataBundle(x, y, 8, 12);
                     counter++;
                 }
             }
@@ -233,7 +233,8 @@ namespace Template
                 firstFrame = false;
             }
             // handle keys, only when running time set to -1 (infinite)
-            if (runningTime == -1) if (camera.HandleInput())
+            if (runningTime == -1) 
+                if (camera.HandleInput())
                 {
                     // camera moved; restart
                     ClearAccumulator();
@@ -252,6 +253,7 @@ namespace Template
                 GL.Finish();
                 // clear the screen
                 screen.Clear(0);
+
                 // do opencl stuff
                 if (GLInterop)
                 {
@@ -261,12 +263,11 @@ namespace Template
                 {
                     kernel.SetMemoryArgument(0, buffer);
                 }
-                kernel.SetValueArgument(1, t);
-                t += 0.1f;
+                
                 // execute kernel
-                long[] workSize = { screen.width, screen.height };
-                long[] localSize = { 32, 4 };
-                // long [] workSize = { 512 * 512 };
+                //long[] workSize = { screen.width, screen.height };
+                long[] localSize = { 8, 12 };
+                long [] workSize = { screen.width , screen.height };
                 if (GLInterop)
                 {
                     List<ComputeMemory> c = new List<ComputeMemory>() { texBuffer };
@@ -277,6 +278,11 @@ namespace Template
                 }
                 else
                 {
+                    camera.Update();
+                    gpuCamera = new GPUCamera(camera.pos, camera.p1, camera.p2, camera.p3, camera.up, camera.right, screen.width, screen.height, camera.lensSize);
+                    float scale = 1.0f / (float)++spp;
+                    kernel.SetValueArgument(2, gpuCamera);
+                    kernel.SetValueArgument(3, scale);
                     queue.Execute(kernel, null, workSize, localSize, null);
                     queue.Finish();
                     // fetch results
@@ -285,24 +291,14 @@ namespace Template
                         queue.ReadFromBuffer(buffer, ref data, true, null);
 
                         // visualize result
-                        for (int y = 0; y < screen.height; y++) for (int x = 0; x < screen.width; x++)
+                        for (int y = 0; y < screen.height; y++) 
+                            for (int x = 0; x < screen.width; x++)
                             {
                                 int temp = x + y * screen.width;
                                 screen.pixels[temp] = data[temp];
                             }
                     }
                 }
-                
-
-                camera.Update();
-                gpuCamera = new GPUCamera(camera.pos, camera.p1, camera.p2, camera.p3, camera.up, camera.right, screen.width, screen.height, camera.lensSize);
-                float scale = 1.0f / (float)++spp;
-                kernel.SetValueArgument(2, gpuCamera);
-                kernel.SetValueArgument(3, scale);
-                queue.Execute(kernel, null, work, null, null);
-                queue.Finish();
-                queue.ReadFromBuffer(buffer, ref screen.pixels, true, null);
-                int[] pixels = new int[screen.pixels.Length];
             }
             else
             {

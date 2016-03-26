@@ -1,47 +1,38 @@
 Testcase;Status;Tijd;CPU;Omschrijving
-Referentie;Correct;55;15.23;100%
-CPU-versie;Correct;246;15.04;598%
-GPU-versie;Error;15;15.00;100%
+Referentie;Correct;56;15.14;100%
+CPU-versie;Correct;288;15.01;726%
+GPU-versie;Fout;747;15.00;100%
 
 ------------------------------------
 
-1;Referentie;Correct;55;15.23;100%
+1;Referentie;Correct;56;15.14;100%
 Test 1 - Referentie
 Benchmark van ons referentieprogramma
 
 Uitvoer:
-55 15234 49.25144 6 12
+56 15141 49.14419 6 12
 
 ------------------------------------
 
-2;CPU-versie;Correct;246;15.04;598%
+2;CPU-versie;Correct;288;15.01;726%
 Test 2 - CPU-versie
 Benchmark van de multithreaded versie.
 
 Uitvoer:
-246 15038 46.62275 6 12
+288 15007 46.50579 6 12
 
-Performance-winst t.o.v. referentie: 447%
+Performance-winst t.o.v. referentie: 514%
 We verwachten op deze computer 609% tot 673%
 Indicatie aantal punten: 0 / 3
 
 ------------------------------------
 
-3;GPU-versie;Error;15;15.00;100%
+3;GPU-versie;Fout;747;15.00;100%
 Test 3 - GPU-versie
 Benchmark van de OpenCL-versie
 
 Uitvoer:
-(leeg)
-
-Foutmelding:
-Unhandled Exception: System.NullReferenceException: Object reference not set to an instance of an object.
-   at Template.Game.Tick() in d:\Users\Documents\GitHub\PathTracer\game.cs:line 300
-   at Template.OpenTKApp.OnRenderFrame(FrameEventArgs e) in d:\Users\Documents\GitHub\PathTracer\template.cs:line 57
-   at OpenTK.GameWindow.RaiseRenderFrame(Double elapsed, Double& timestamp)
-   at OpenTK.GameWindow.DispatchUpdateAndRenderFrame(Object sender, EventArgs e)
-   at OpenTK.GameWindow.Run(Double updates_per_second, Double frames_per_second)
-   at Template.OpenTKApp.Main(String[] args) in d:\Users\Documents\GitHub\PathTracer\template.cs:line 99
+747 15003 164.0962 6 12
 
 De afwijking van de referentie-afbeelding was te groot (rmse > 150).
 

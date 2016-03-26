@@ -58,9 +58,13 @@ namespace Template
         {
             Vector3 L = sphere.pos - ray.O;
             float tca = Vector3.Dot(L, ray.D);
-            if (tca < 0) return;
+            if (tca < 0) 
+                return;
+            
             float d2 = Vector3.Dot(L, L) - tca * tca;
-            if (d2 > sphere.r) return;
+            if (d2 > sphere.r) 
+                return;
+
             float thc = (float)Math.Sqrt(sphere.r - d2);
             float t0 = tca - thc;
             float t1 = tca + thc;
